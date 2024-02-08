@@ -42,20 +42,21 @@ import sys
 import urllib.parse
 import warnings
 from builtins import *
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict, namedtuple
 from datetime import datetime, timedelta, tzinfo
 
 from past.builtins import basestring
 
 from .config import WEBEX_TEAMS_DATETIME_FORMAT
 from .exceptions import (
-    ApiError, RateLimitError,
+    ApiError,
+    RateLimitError,
 )
 from .response_codes import RATE_LIMIT_RESPONSE_CODE
 
-
-EncodableFile = namedtuple('EncodableFile',
-                           ['file_name', 'file_object', 'content_type'])
+EncodableFile = namedtuple(
+    "EncodableFile", ["file_name", "file_object", "content_type"]
+)
 
 
 def to_unicode(string):
@@ -63,12 +64,12 @@ def to_unicode(string):
     assert isinstance(string, basestring)
     if sys.version_info[0] >= 3:
         if isinstance(string, bytes):
-            return string.decode('utf-8')
+            return string.decode("utf-8")
         else:
             return string
     else:
         if isinstance(string, str):
-            return string.decode('utf-8')
+            return string.decode("utf-8")
         else:
             return string
 
@@ -78,12 +79,12 @@ def to_bytes(string):
     assert isinstance(string, basestring)
     if sys.version_info[0] >= 3:
         if isinstance(string, str):
-            return string.encode('utf-8')
+            return string.encode("utf-8")
         else:
             return string
     else:
         if isinstance(string, unicode):
-            return string.encode('utf-8')
+            return string.encode("utf-8")
         else:
             return string
 
@@ -94,8 +95,10 @@ def validate_base_url(base_url):
     if parsed_url.scheme and parsed_url.netloc:
         return parsed_url.geturl()
     else:
-        error_message = "base_url must contain a valid scheme (protocol " \
-                        "specifier) and network location (hostname)"
+        error_message = (
+            "base_url must contain a valid scheme (protocol "
+            "specifier) and network location (hostname)"
+        )
         raise ValueError(error_message)
 
 
@@ -104,12 +107,8 @@ def is_web_url(string):
     assert isinstance(string, basestring)
     parsed_url = urllib.parse.urlparse(string)
     return (
-        (
-            parsed_url.scheme.lower() == 'http'
-            or parsed_url.scheme.lower() == 'https'
-        )
-        and parsed_url.netloc
-    )
+        parsed_url.scheme.lower() == "http" or parsed_url.scheme.lower() == "https"
+    ) and parsed_url.netloc
 
 
 def is_local_file(string):
@@ -123,11 +122,11 @@ def open_local_file(file_path):
     assert isinstance(file_path, basestring)
     assert is_local_file(file_path)
     file_name = os.path.basename(file_path)
-    file_object = open(file_path, 'rb')
-    content_type = mimetypes.guess_type(file_name)[0] or 'text/plain'
-    return EncodableFile(file_name=file_name,
-                         file_object=file_object,
-                         content_type=content_type)
+    file_object = open(file_path, "rb")
+    content_type = mimetypes.guess_type(file_name)[0] or "text/plain"
+    return EncodableFile(
+        file_name=file_name, file_object=file_object, content_type=content_type
+    )
 
 
 def check_type(obj, acceptable_types, optional=False):
@@ -164,7 +163,7 @@ def check_type(obj, acceptable_types, optional=False):
                 types=", ".join([repr(t.__name__) for t in acceptable_types]),
                 none="or 'None'" if optional else "",
                 obj=obj,
-                obj_type=repr(type(obj).__name__)
+                obj_type=repr(type(obj).__name__),
             )
         )
         raise TypeError(error_message)
@@ -184,10 +183,16 @@ def dict_from_items_with_values(*dictionaries, **items):
     dict_list = list(dictionaries)
     dict_list.append(items)
     result = {}
+
     for d in dict_list:
         for key, value in d.items():
-            if value is not None:
-                result[key] = value
+            if value is None:
+                continue
+
+            if key.startswith("_"):
+                key = key[1:]
+
+            result[key] = value
     return result
 
 
@@ -213,7 +218,7 @@ def check_response_code(response, expected_response_code):
         ApiError: If the requests.response.status_code does not match the
             provided expected response code (erc).
 
-     """
+    """
     if response.status_code == expected_response_code:
         pass
     elif response.status_code == RATE_LIMIT_RESPONSE_CODE:
@@ -262,17 +267,17 @@ def json_dict(json_data):
 
 def make_attachment(card):
     """Given a card, makes a card attachment by attaching the correct
-       content type and content.
+     content type and content.
 
-      Args:
-        card(AdaptiveCard): Adaptive Card object that should be attached
+    Args:
+      card(AdaptiveCard): Adaptive Card object that should be attached
 
-      Returns:
-        A Python dictionary containing the card attachment dictionary
+    Returns:
+      A Python dictionary containing the card attachment dictionary
     """
     attachment = {
         "contentType": "application/vnd.microsoft.card.adaptive",
-        "content": card.to_dict()
+        "content": card.to_dict(),
     }
 
     return attachment
@@ -301,9 +306,11 @@ class WebexTeamsDateTime(datetime):
     @classmethod
     def strptime(cls, date_string, format=WEBEX_TEAMS_DATETIME_FORMAT):
         """strptime with the Webex Teams DateTime format as the default."""
-        return super(WebexTeamsDateTime, cls).strptime(
-            date_string, format
-        ).replace(tzinfo=ZuluTimeZone())
+        return (
+            super(WebexTeamsDateTime, cls)
+            .strptime(date_string, format)
+            .replace(tzinfo=ZuluTimeZone())
+        )
 
     def strftime(self, fmt=WEBEX_TEAMS_DATETIME_FORMAT):
         """strftime with the Webex Teams DateTime format as the default."""
@@ -314,10 +321,12 @@ class WebexTeamsDateTime(datetime):
         if self.tzinfo:
             dt = self.astimezone(ZuluTimeZone())
         else:
-            warnings.warn(UserWarning(
-                "Datetime {} does not have an associated timezone; assuming it"
-                "should be UTC/Zulu.".format(repr(self))
-            ))
+            warnings.warn(
+                UserWarning(
+                    "Datetime {} does not have an associated timezone; assuming it"
+                    "should be UTC/Zulu.".format(repr(self))
+                )
+            )
             dt = self.replace(tzinfo=ZuluTimeZone())
 
         return dt.strftime("%Y-%m-%dT%H:%M:%S.{:0=3}%Z").format(

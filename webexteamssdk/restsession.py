@@ -33,6 +33,7 @@ from __future__ import (
 from builtins import *
 
 from future import standard_library
+
 standard_library.install_aliases()
 
 import json
@@ -52,9 +53,11 @@ from .config import DEFAULT_SINGLE_REQUEST_TIMEOUT, DEFAULT_WAIT_ON_RATE_LIMIT
 from .exceptions import MalformedResponse, RateLimitError, RateLimitWarning
 from .response_codes import EXPECTED_RESPONSE_CODE
 from .utils import (
-    check_response_code, check_type, extract_and_parse_json, validate_base_url,
+    check_response_code,
+    check_type,
+    extract_and_parse_json,
+    validate_base_url,
 )
-
 
 logger = logging.getLogger(__name__)
 
@@ -94,8 +97,10 @@ def _fix_next_url(next_url):
         query_list = parsed_url.query.split("&")
         if "max=null" in query_list:
             query_list.remove("max=null")
-            warnings.warn("`max=null` still present in next-URL returned "
-                          "from Webex Teams", RuntimeWarning)
+            warnings.warn(
+                "`max=null` still present in next-URL returned " "from Webex Teams",
+                RuntimeWarning,
+            )
         new_query = "&".join(query_list)
         parsed_url = list(parsed_url)
         parsed_url[4] = new_query
@@ -151,7 +156,7 @@ def user_agent(be_geo_id=None, caller=None):
         data["cpu"] = platform.machine()
 
     data["organization"] = {}
-    
+
     # Add self-identified organization information to the User-Agent Header.
     if be_geo_id:
         data["organization"]["be_geo_id"] = be_geo_id
@@ -175,13 +180,17 @@ def user_agent(be_geo_id=None, caller=None):
 class RestSession(object):
     """RESTful HTTP session class for making calls to the Webex Teams APIs."""
 
-    def __init__(self, access_token, base_url,
-                 single_request_timeout=DEFAULT_SINGLE_REQUEST_TIMEOUT,
-                 wait_on_rate_limit=DEFAULT_WAIT_ON_RATE_LIMIT,
-                 proxies=None,
-                 be_geo_id=None,
-                 caller=None,
-                 disable_ssl_verify=False):
+    def __init__(
+        self,
+        access_token,
+        base_url,
+        single_request_timeout=DEFAULT_SINGLE_REQUEST_TIMEOUT,
+        wait_on_rate_limit=DEFAULT_WAIT_ON_RATE_LIMIT,
+        proxies=None,
+        be_geo_id=None,
+        caller=None,
+        disable_ssl_verify=False,
+    ):
         """Initialize a new RestSession object.
 
         Args:
@@ -231,16 +240,17 @@ class RestSession(object):
         if disable_ssl_verify:
             self._req_session.verify = False
 
-
         if proxies is not None:
             self._req_session.proxies.update(proxies)
 
         # Update the HTTP headers for the session
-        self.update_headers({
-            "Authorization": "Bearer " + access_token,
-            "Content-type": "application/json;charset=utf-8",
-            "User-Agent": user_agent(be_geo_id=be_geo_id, caller=caller),
-        })
+        self.update_headers(
+            {
+                "Authorization": "Bearer " + access_token,
+                "Content-type": "application/json;charset=utf-8",
+                "User-Agent": user_agent(be_geo_id=be_geo_id, caller=caller),
+            }
+        )
 
     @property
     def base_url(self):
@@ -351,6 +361,7 @@ class RestSession(object):
         while True:
             # Make the HTTP request to the API endpoint
             response = self._req_session.request(method, abs_url, **kwargs)
+            # print(response.request.__dict__)
 
             try:
                 # Check the response code for error conditions
@@ -467,8 +478,9 @@ class RestSession(object):
             items = json_page.get("items")
 
             if items is None:
-                error_message = "'items' key not found in JSON data: " \
-                                "{!r}".format(json_page)
+                error_message = "'items' key not found in JSON data: " "{!r}".format(
+                    json_page
+                )
                 raise MalformedResponse(error_message)
 
             else:
@@ -496,8 +508,7 @@ class RestSession(object):
         # Expected response code
         erc = kwargs.pop("erc", EXPECTED_RESPONSE_CODE["POST"])
 
-        response = self.request("POST", url, erc, json=json, data=data,
-                                **kwargs)
+        response = self.request("POST", url, erc, json=json, data=data, **kwargs)
         return extract_and_parse_json(response)
 
     def put(self, url, json=None, data=None, **kwargs):
@@ -521,8 +532,7 @@ class RestSession(object):
         # Expected response code
         erc = kwargs.pop("erc", EXPECTED_RESPONSE_CODE["PUT"])
 
-        response = self.request("PUT", url, erc, json=json, data=data,
-                                **kwargs)
+        response = self.request("PUT", url, erc, json=json, data=data, **kwargs)
         return extract_and_parse_json(response)
 
     def delete(self, url, **kwargs):

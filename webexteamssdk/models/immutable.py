@@ -30,16 +30,18 @@ SOFTWARE.
 """
 
 from __future__ import (
-    absolute_import, absolute_import, division, division,
-    print_function, print_function, unicode_literals, unicode_literals,
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
 )
 
-from builtins import *
-
 import json
+from builtins import *
 from collections import defaultdict
 
 from webexteamssdk.utils import json_dict
+
 from .mixins.access_token import AccessTokenBasicPropertiesMixin
 from .mixins.admin_audit_event import (
     AdminAuditEventBasicPropertiesMixin,
@@ -49,10 +51,17 @@ from .mixins.attachment_action import AttachmentActionBasicPropertiesMixin
 from .mixins.event import EventBasicPropertiesMixin
 from .mixins.guest_issuer_token import GuestIssuerTokenBasicPropertiesMixin
 from .mixins.license import LicenseBasicPropertiesMixin
+from .mixins.meeting_invitees import MeetingInviteeBasicPropertiesMixin
+from .mixins.meeting_templates import MeetingTemplateBasicPropertiesMixin
+from .mixins.meetings import MeetingBasicPropertiesMixin
 from .mixins.membership import MembershipBasicPropertiesMixin
 from .mixins.message import MessageBasicPropertiesMixin
 from .mixins.organization import OrganizationBasicPropertiesMixin
 from .mixins.person import PersonBasicPropertiesMixin
+from .mixins.recording import (
+    RecordingBasicPropertiesMixin,
+    RecordingReportBasicPropertiesMixin,
+)
 from .mixins.role import RoleBasicPropertiesMixin
 from .mixins.room import RoomBasicPropertiesMixin
 from .mixins.room_meeting_info import RoomMeetingInfoBasicPropertiesMixin
@@ -60,10 +69,7 @@ from .mixins.team import TeamBasicPropertiesMixin
 from .mixins.team_membership import TeamMembershipBasicPropertiesMixin
 from .mixins.webhook import WebhookBasicPropertiesMixin
 from .mixins.webhook_event import WebhookEventBasicPropertiesMixin
-from .mixins.recording import RecordingBasicPropertiesMixin
-from .mixins.meetings import MeetingBasicPropertiesMixin
-from .mixins.meeting_templates import MeetingTemplateBasicPropertiesMixin
-from .mixins.meeting_invitees import MeetingInviteeBasicPropertiesMixin
+
 
 class ImmutableData(object):
     """Model a Webex Teams JSON object as an immutable native Python object."""
@@ -109,8 +115,9 @@ class ImmutableData(object):
                 return item_data
         else:
             raise AttributeError(
-                "'{}' object has no attribute '{}'"
-                "".format(self.__class__.__name__, item)
+                "'{}' object has no attribute '{}'" "".format(
+                    self.__class__.__name__, item
+                )
             )
 
     def __str__(self):
@@ -138,15 +145,12 @@ class ImmutableData(object):
             # Freeze the elements of the dictionary, sort them, and return
             # them as a list of tuples
             key_value_tuples = [
-                (key, cls._serialize(value))
-                for key, value in data.items()
+                (key, cls._serialize(value)) for key, value in data.items()
             ]
             key_value_tuples.sort()
             return tuple(key_value_tuples)
         else:
-            raise TypeError(
-                "Unable to freeze {} data type.".format(type(data))
-            )
+            raise TypeError("Unable to freeze {} data type.".format(type(data)))
 
     def _freeze(self):
         """Freeze this object's JSON data."""
@@ -154,8 +158,7 @@ class ImmutableData(object):
 
     def __eq__(self, other):
         """Determine if two objects are equal."""
-        return isinstance(other, self.__class__) \
-            and self._freeze() == other._freeze()
+        return isinstance(other, self.__class__) and self._freeze() == other._freeze()
 
     def __hash__(self):
         """Hash the data object."""
@@ -185,8 +188,7 @@ class AccessToken(ImmutableData, AccessTokenBasicPropertiesMixin):
     """Webex Teams Access-Token data model."""
 
 
-class AdminAuditEventData(ImmutableData,
-                          AdminAuditEventDataBasicPropertiesMixin):
+class AdminAuditEventData(ImmutableData, AdminAuditEventDataBasicPropertiesMixin):
     """Webex Teams Admin Audit Event Data object data model."""
 
 
@@ -196,7 +198,7 @@ class AdminAuditEvent(ImmutableData, AdminAuditEventBasicPropertiesMixin):
     @property
     def data(self):
         """The event resource data."""
-        return AdminAuditEventData(self._json_data.get('data'))
+        return AdminAuditEventData(self._json_data.get("data"))
 
 
 class AttachmentAction(ImmutableData, AttachmentActionBasicPropertiesMixin):
@@ -213,7 +215,7 @@ class Event(ImmutableData, EventBasicPropertiesMixin):
         This object will contain the event's resource, such as memberships or
         messages, at the time the event took place.
         """
-        return ImmutableData(self._json_data.get('data'))
+        return ImmutableData(self._json_data.get("data"))
 
 
 class License(ImmutableData, LicenseBasicPropertiesMixin):
@@ -266,24 +268,32 @@ class WebhookEvent(ImmutableData, WebhookEventBasicPropertiesMixin):
     @property
     def data(self):
         """The event resource data."""
-        return ImmutableData(self._json_data.get('data'))
+        return ImmutableData(self._json_data.get("data"))
 
 
 class GuestIssuerToken(ImmutableData, GuestIssuerTokenBasicPropertiesMixin):
     """Webex Teams Guest Issuer Token data model"""
 
 
+class RecordingReport(ImmutableData, RecordingReportBasicPropertiesMixin):
+    """Webex Teams Recording data model"""
+
+
 class Recording(ImmutableData, RecordingBasicPropertiesMixin):
     """Webex Teams Recording data model"""
+
 
 class Meeting(ImmutableData, MeetingBasicPropertiesMixin):
     """Webex Meeting data model"""
 
+
 class MeetingTemplate(ImmutableData, MeetingTemplateBasicPropertiesMixin):
     """Webex MeetingTemplate data model"""
 
+
 class MeetingInvitees(ImmutableData, MeetingInviteeBasicPropertiesMixin):
     """Webex MeetingInvitees data model"""
+
 
 immutable_data_models = defaultdict(
     lambda: ImmutableData,
@@ -307,7 +317,7 @@ immutable_data_models = defaultdict(
     recording=Recording,
     meeting=Meeting,
     meetingTemplate=MeetingTemplate,
-    meetingInvitee=MeetingInvitees
+    meetingInvitee=MeetingInvitees,
 )
 
 
