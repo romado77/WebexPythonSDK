@@ -126,3 +126,71 @@ class RecordingBasicPropertiesMixin(object):
     def integrationTags(self):
         """External keys of the parent meeting created by an integration application."""
         return self._json_data.get("integrationTags")
+
+
+class RecordingReportBasicPropertiesMixin(object):
+    """Recording report basic properties"""
+
+    @property
+    def recordingId(self):
+        """The unique identifier for the recording."""
+        return self._json_data.get("recordingId")
+
+    @property
+    def topic(self):
+        """The recording's topic."""
+        return self._json_data.get("topic")
+
+    @property
+    def timeRecorded(self):
+        """The date and time recording started in ISO 8601 compliant format."""
+        recorded = self._json_data.get("timeRecorded")
+        if recorded:
+            return WebexTeamsDateTime.strptime(recorded)
+
+    @property
+    def accessTime(self):
+        """The date and time recording was accessed in ISO 8601 compliant format."""
+        recorded = self._json_data.get("accessTime")
+        if recorded:
+            return WebexTeamsDateTime.strptime(recorded)
+
+    @property
+    def siteUrl(self):
+        """Site URL for the recording."""
+        return self._json_data.get("siteUrl")
+
+    @property
+    def hostEmail(self):
+        """Email address for the meeting host."""
+        return self._json_data.get("hostEmail")
+
+    @property
+    def viewCount(self):
+        """The number of times the recording was viewed."""
+        return self._json_data.get("viewCount")
+
+    @property
+    def downloadCount(self):
+        """The number of times the recording was downloaded."""
+        return self._json_data.get("downloadCount")
+
+    @property
+    def email(self):
+        """Email address for the user who viewed or downloaded the recording."""
+        return self._json_data.get("email")
+
+    @property
+    def format(self):
+        """The recording's file format."""
+        return self._json_data.get("format")
+
+    @property
+    def viewed(self):
+        """Whether or not the recording was viewed."""
+        return self._json_data.get("viewed")
+
+    @property
+    def downloaded(self):
+        """Whether or not the recording was downloaded."""
+        return self._json_data.get("downloaded")
