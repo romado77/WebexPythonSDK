@@ -85,3 +85,6 @@ from .utils import WebexTeamsDateTime
 # Initialize Package Logging
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+from . import _version
+__version__ = _version.get_versions()['version']
